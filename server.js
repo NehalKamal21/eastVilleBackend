@@ -21,11 +21,7 @@ app.use(
 );
 
 // 🔹 MongoDB Connection
-mongoose
-    .connect("mongodb://localhost:27017/villasDB", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
+mongoose.connect("mongodb://localhost:27017/villasDB")
     .then(() => console.log("✅ MongoDB Connected"))
     .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
@@ -59,18 +55,27 @@ const Cluster = mongoose.model("Cluster", ClusterSchema);
 
 // 🔹 Contact Us Schema & Model
 const ContactSchema = new mongoose.Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    name: { type: String, required: true },              // single full name field
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    residence: { type: String, required: true },
-    nationality: { type: String, required: true },
+    interestedUnit: { type: String },                    // optional unit info
     message: { type: String, required: true },
-    status: { type: String, default: "Pending" }, // New, In Progress, Resolved
+
+    status: {
+        type: String,
+        enum: ["Pending", "In Progress", "Resolved"],
+        default: "Pending",
+    },
+
     createdAt: { type: Date, default: Date.now },
-    updatedBy: { username: String }, // Admin who updates it
+
+    updatedBy: {
+        username: { type: String },
+    },
+
     updatedAt: { type: Date, default: Date.now },
-    salesComment: { type: String }
+
+    salesComment: { type: String },
 });
 const Contact = mongoose.model("Contact", ContactSchema);
 
@@ -208,24 +213,20 @@ app.get("/villa/search/:combinedId", async (req, res) => {
 // 🔹 Store Contact Us Messages in DB
 app.post("/contact", async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, residence, nationality, message, callTime } = req.body;
-
+        const { name, email, phone, interestedUnit, message } = req.body;
+        debugger;
         // Ensure all required fields are present
-        if (!firstName || !lastName || !email || !phone || !residence || !nationality || !message || !callTime) {
-            return res.status(400).json({ error: "All fields are required" });
+        if (!name || !email || !phone || !message) {
+            return res.status(400).json({ error: "Name, Email, Phone, and Message are required" });
         }
 
         // Create and save the new contact entry
         const newContact = new Contact({
-            firstName,
-            lastName,
+            name,
             email,
             phone,
-            residence,
-            nationality,
-            callTime,
+            interestedUnit,
             message,
-            callTime
         });
 
         await newContact.save();
@@ -235,6 +236,7 @@ app.post("/contact", async (req, res) => {
         res.status(500).json({ error: "Error saving contact message" });
     }
 });
+
 
 // 🔹 Retrieve All Contact Messages (Admin Only)
 app.get("/contacts", authenticateToken, async (req, res) => {
@@ -273,5 +275,5 @@ app.put("/contacts/:id", authenticateToken, async (req, res) => {
 });
 
 // 🔹 Start Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
