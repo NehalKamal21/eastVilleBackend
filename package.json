@@ -22,7 +22,12 @@
     "migrate": "node src/database/migrations/index.js",
     "seed": "node src/database/seeders/index.js"
   },
-  "keywords": ["villa", "management", "real-estate", "api"],
+  "keywords": [
+    "villa",
+    "management",
+    "real-estate",
+    "api"
+  ],
   "author": "EastVille Team",
   "license": "MIT",
   "dependencies": {
