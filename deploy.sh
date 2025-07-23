@@ -138,11 +138,11 @@ deploy_app() {
     if [ -d "$APP_DIR/.git" ]; then
         print_status "Updating existing repository..."
         cd $APP_DIR
-        git pull origin main
+        git pull origin master
     else
         print_status "Cloning repository..."
         cd $APP_DIR
-        git clone https://github.com/NehalKamal21/eastVilleBackend.git .
+        git clone https://github.com/NehalKamal21/eastVilleBackend.git.
     fi
     
     # Install dependencies
@@ -168,7 +168,7 @@ NODE_ENV=production
 PORT=5001
 
 # MongoDB Configuration
-MONGODB_URI=mongodb://$DB_USER:eastville_user@#$5050Ajna@localhost:27017/$DB_NAME?authSource=$DB_NAME
+MONGODB_URI=mongodb://$DB_USER:Admin@#$5050Ajna@localhost:27017/$DB_NAME?authSource=$DB_NAME
 
 # JWT Configuration
 JWT_SECRET=YOUR_SUPER_SECURE_JWT_SECRET_KEY_HERE
