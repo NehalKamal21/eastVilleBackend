@@ -15,7 +15,6 @@ NC='\033[0m' # No Color
 # Configuration
 APP_NAME="eastville-backend"
 APP_DIR="/var/www/eastville-backend"
-DOMAIN="your-domain.com"  # Change this to your actual domain
 DB_NAME="villasDB"
 DB_USER="eastville_user"
 
@@ -124,7 +123,7 @@ setup_mongodb() {
     fi
     
     print_warning "Please manually create MongoDB users as described in DEPLOYMENT.md"
-    print_warning "Run: mongosh admin --eval \"db.createUser({user: 'admin', pwd: 'YOUR_STRONG_ADMIN_PASSWORD', roles: [{role: 'userAdminAnyDatabase', db: 'admin'}, {role: 'readWriteAnyDatabase', db: 'admin'}, {role: 'dbAdminAnyDatabase', db: 'admin'}]})\""
+    print_warning "Run: mongosh admin --eval \"db.createUser({user: 'eastville_user', pwd: 'Admin@#$5050Ajna', roles: [{role: 'userAdminAnyDatabase', db: 'admin'}, {role: 'readWriteAnyDatabase', db: 'admin'}, {role: 'dbAdminAnyDatabase', db: 'admin'}]})\""
 }
 
 # Function to deploy application
@@ -169,7 +168,7 @@ NODE_ENV=production
 PORT=5001
 
 # MongoDB Configuration
-MONGODB_URI=mongodb://$DB_USER:Admin@#$5050Ajna@localhost:27017/$DB_NAME?authSource=$DB_NAME
+MONGODB_URI=mongodb://$DB_USER:eastville_user@#$5050Ajna@localhost:27017/$DB_NAME?authSource=$DB_NAME
 
 # JWT Configuration
 JWT_SECRET=YOUR_SUPER_SECURE_JWT_SECRET_KEY_HERE
