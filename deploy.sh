@@ -43,8 +43,8 @@ command_exists() {
 
 # Function to check if running as root
 check_root() {
-    if [[ $EUID -eq 0 ]]; then
-        print_error "This script should not be run as root"
+    if [[ $EUID -ne 0 ]]; then
+        print_error "This script must be run as root"
         exit 1
     fi
 }
@@ -52,7 +52,7 @@ check_root() {
 # Function to update system
 update_system() {
     print_status "Updating system packages..."
-    sudo apt update && sudo apt upgrade -y
+    apt update && apt upgrade -y
     print_success "System updated successfully"
 }
 
@@ -63,8 +63,8 @@ install_dependencies() {
     # Install Node.js 18+
     if ! command_exists node; then
         print_status "Installing Node.js 18+..."
-        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-        sudo apt-get install -y nodejs
+        curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+        apt-get install -y nodejs
     else
         print_status "Node.js already installed"
     fi
@@ -72,7 +72,7 @@ install_dependencies() {
     # Install PM2
     if ! command_exists pm2; then
         print_status "Installing PM2..."
-        sudo npm install -g pm2
+        npm install -g pm2
     else
         print_status "PM2 already installed"
     fi
@@ -80,7 +80,7 @@ install_dependencies() {
     # Install Nginx
     if ! command_exists nginx; then
         print_status "Installing Nginx..."
-        sudo apt install nginx -y
+        apt install nginx -y
     else
         print_status "Nginx already installed"
     fi
@@ -88,10 +88,10 @@ install_dependencies() {
     # Install MongoDB
     if ! command_exists mongod; then
         print_status "Installing MongoDB..."
-        wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-        echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-        sudo apt update
-        sudo apt install -y mongodb-org
+        wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | apt-key add -
+        echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+        apt update
+        apt install -y mongodb-org
     else
         print_status "MongoDB already installed"
     fi
@@ -99,7 +99,7 @@ install_dependencies() {
     # Install Git
     if ! command_exists git; then
         print_status "Installing Git..."
-        sudo apt install git -y
+        apt install git -y
     else
         print_status "Git already installed"
     fi
@@ -112,11 +112,11 @@ setup_mongodb() {
     print_status "Setting up MongoDB..."
     
     # Start and enable MongoDB
-    sudo systemctl start mongod
-    sudo systemctl enable mongod
+    systemctl start mongod
+    systemctl enable mongod
     
     # Check if MongoDB is running
-    if sudo systemctl is-active --quiet mongod; then
+    if systemctl is-active --quiet mongod; then
         print_success "MongoDB is running"
     else
         print_error "Failed to start MongoDB"
@@ -132,8 +132,8 @@ deploy_app() {
     print_status "Deploying application..."
     
     # Create application directory
-    sudo mkdir -p $APP_DIR
-    sudo chown $USER:$USER $APP_DIR
+    mkdir -p $APP_DIR
+    chown www-data:www-data $APP_DIR
     
     # Clone or update repository
     if [ -d "$APP_DIR/.git" ]; then
@@ -152,6 +152,7 @@ deploy_app() {
     
     # Create logs directory
     mkdir -p logs
+    chown www-data:www-data logs
     
     print_success "Application deployed successfully"
 }
@@ -216,7 +217,7 @@ setup_nginx() {
     print_status "Setting up Nginx..."
     
     # Create Nginx configuration
-    sudo tee /etc/nginx/sites-available/$APP_NAME > /dev/null << EOF
+    tee /etc/nginx/sites-available/$APP_NAME > /dev/null << EOF
 server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
@@ -242,11 +243,11 @@ server {
 EOF
     
     # Enable site
-    sudo ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
+    ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
     
     # Test and restart Nginx
-    sudo nginx -t
-    sudo systemctl restart nginx
+    nginx -t
+    systemctl restart nginx
     
     print_success "Nginx configured successfully"
 }
@@ -257,18 +258,18 @@ setup_firewall() {
     
     # Install UFW if not installed
     if ! command_exists ufw; then
-        sudo apt install ufw -y
+        apt install ufw -y
     fi
     
     # Configure firewall
-    sudo ufw default deny incoming
-    sudo ufw default allow outgoing
-    sudo ufw allow ssh
-    sudo ufw allow 80/tcp
-    sudo ufw allow 443/tcp
+    ufw default deny incoming
+    ufw default allow outgoing
+    ufw allow ssh
+    ufw allow 80/tcp
+    ufw allow 443/tcp
     
     # Enable firewall
-    echo "y" | sudo ufw enable
+    echo "y" | ufw enable
     
     print_success "Firewall configured successfully"
 }
@@ -285,14 +286,14 @@ check_deployment() {
     fi
     
     # Check Nginx status
-    if sudo systemctl is-active --quiet nginx; then
+    if systemctl is-active --quiet nginx; then
         print_success "Nginx is running"
     else
         print_error "Nginx is not running"
     fi
     
     # Check MongoDB status
-    if sudo systemctl is-active --quiet mongod; then
+    if systemctl is-active --quiet mongod; then
         print_success "MongoDB is running"
     else
         print_error "MongoDB is not running"
