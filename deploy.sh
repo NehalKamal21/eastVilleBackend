@@ -142,7 +142,7 @@ deploy_app() {
     else
         print_status "Cloning repository..."
         cd $APP_DIR
-        git clone https://github.com/NehalKamal21/eastVilleBackend.git .
+        git clone https://github.com/NehalKamal21/eastVilleBackend.git.
     fi
     
     # Install dependencies
